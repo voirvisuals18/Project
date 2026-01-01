@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            height: 100dvh;
+            background: url('bg.jpg') center/cover no-repeat;
+            font-family: Arial;
+            padding: 20px;
+            margin: 0 10px;
+        }
+
+        h2 {
+            word-break: break-word;
+            display: flex;
+            color: white;
+            background: #f2a1b3;
+            border: 1px solid #ffafaf;
+            border-radius: 6px;
+            padding: 8.5px 10px;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .actions button {
+            background: #f2a1b3;
+            border: none;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+        }
+
+        .dashboard-controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 18px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-group {
+            flex: 2;
+            min-width: 0;
+        }
+
+        .dashboard-controls input[type="text"] {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1.5px solid #f2a1b3;
+            background: #fff;
+            color: #222;
+            font-size: 1rem;
+            box-sizing: border-box;
+            box-shadow: 0 2px 8px rgba(242, 161, 179, 0.10);
+            transition: border 0.2s;
+        }
+
+        .dashboard-controls select {
+            flex: 1;
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: 1.5px solid #f2a1b3;
+            background: #fff;
+            color: #222;
+            font-size: 1rem;
+            min-width: 140px;
+            box-shadow: 0 2px 8px rgba(242, 161, 179, 0.10);
+            /* Hide default arrow for most browsers */
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: none;
+        }
+
+        /* Hide default arrow for IE10+ */
+        #filterSelect::-ms-expand {
+            display: none;
+        }
+
+        .dashboard-controls input[type="text"]:focus,
+        .dashboard-controls select:focus {
+            border: 1.5px solid #ffafaf;
+            outline: none;
+        }
+
+        .dashboard-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th,
+        td {
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid #ffafaf;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f2a1b3;
+            color: white;
+            font-size: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        tr:hover {
+            background: #f0f4fa;
+        }
+
+        /* Floating Sidebar for Mobile */
+        .floating-sidebar {
+            display: none;
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            z-index: 1001;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .floating-sidebar button {
+            background: #f2a1b3;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 700px) {
+            .floating-sidebar {
+                display: flex;
+            }
+
+            .actions {
+                display: none !important;
+            }
+
+            .dashboard-controls {
+                flex-wrap: nowrap;
+            }
+
+            .dashboard-controls select {
+                min-width: 100px;
+                padding: 10px 10px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .dashboard-container {
+                padding: 8px;
+            }
+
+            th,
+            td {
+                padding: 7px 4px;
+                font-size: 13px;
+            }
+
+            table {
+                min-width: 420px;
+            }
+        }
+
+        .action-btn {
+            border: none;
+            background: #fff;
+            color: #f2a1b3;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            margin: 0 2px;
+            box-shadow: 0 2px 8px rgba(242, 161, 179, 0.10);
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background: #fff;
+            color: #f2a1b3;
+            border: 1.5px solid #f2a1b3;
+            border-radius: 24px;
+            padding: 8px 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .modal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            min-width: 320px;
+            max-width: 90vw;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+
+        .modal-content textarea {
+            width: 100%;
+            border-radius: 8px;
+            border: 1.5px solid #f2a1b3;
+            resize: none;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-save {
+            background: #f2a1b3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .modal-cancel {
+            background: white;
+            color: #f2a1b3;
+            border: 1.5px solid #f2a1b3;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h2>
+        &nbsp;&nbsp;Dashboard
+        <div class="actions">
+            <button onclick="downloadTXT()" title="Download TXT"><i class="fa-solid fa-file-lines"></i></button>
+            <button onclick="downloadPDF()" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></button>
+            <button class="add-btn" onclick="openAddModal()"><i class="fa fa-plus"></i> Add Question</button>
+        </div>
+    </h2>
+
+    <div class="floating-sidebar">
+        <button onclick="openAddModal()" style="background: #f2a1b3;" title="Add Question"><i
+                class="fa fa-plus"></i></button>
+        <button onclick="downloadTXT()" title="Download TXT"><i class="fa-solid fa-file-lines"></i></button>
+        <button onclick="downloadPDF()" title="Download PDF"><i class="fa-solid fa-file-pdf"></i></button>
+    </div>
+
+    <div id="addModal" class="modal-bg" style="display:none;">
+        <div class="modal-content">
+            <h3>Add New Question</h3>
+            <form id="addQuestionForm" onsubmit="return submitNewQuestion(event)">
+                <label>Question:</label>
+                <textarea id="newQuestion" required placeholder="Type your question..." rows="3"></textarea>
+                <div class="modal-actions">
+                    <button type="submit" class="modal-save">Add</button>
+                    <button type="button" class="modal-cancel" onclick="closeAddModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="dashboard-controls">
+            <div class="search-group">
+                <input type="text" id="searchBar" placeholder="Search Questions or Answers...">
+            </div>
+            <select id="filterSelect">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="notanswered">Not answered yet</option>
+            </select>
+        </div>
+        <div class="dashboard-table-wrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">Sr No</th>
+                        <th>Questions</th>
+                        <th style="text-align: center;">Answer</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-bg" style="display:none;">
+        <div class="modal-content">
+            <h3>Edit Question</h3>
+            <form id="editQuestionForm" onsubmit="return submitEditQuestion(event)">
+                <input type="hidden" id="editId">
+                <label>Question:</label>
+                <textarea id="editQuestion" required rows="3"></textarea>
+                <label>Answer:</label>
+                <textarea id="editAnswer" rows="2"></textarea>
+                <div class="modal-actions">
+                    <button type="submit" class="modal-save">Save</button>
+                    <button type="button" class="modal-cancel" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBcM_H3sxB0TcN0cJYm5TLtRnQw-N8rIpY",
+            authDomain: "bday-que-dashboard.firebaseapp.com",
+            databaseURL: "https://bday-que-dashboard-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bday-que-dashboard",
+            storageBucket: "bday-que-dashboard.firebasestorage.app",
+            messagingSenderId: "990329295440",
+            appId: "1:990329295440:web:b7a0eff62d06f719aeb755"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const dataTable = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+        const searchBar = document.getElementById('searchBar');
+        const filterSelect = document.getElementById('filterSelect');
+        let allData = [];
+
+        function openAddModal() {
+            document.getElementById('addModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('newQuestion').focus(), 100);
+        }
+        function closeAddModal() {
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('addQuestionForm').reset();
+        }
+        function submitNewQuestion(e) {
+            e.preventDefault();
+            const question = document.getElementById('newQuestion').value.trim();
+            if (question) db.ref('questions').push().set({ question: question });
+            closeAddModal();
+            return false;
+        }
+
+        function fetchData() {
+            db.ref('questions').on('value', (snapshot) => {
+                const data = snapshot.val();
+                allData = [];
+                if (data) {
+                    Object.entries(data).forEach(([id, q]) => {
+                        let answerText = (q.answer && q.answer.trim() !== '') ? q.answer : 'Pending';
+                        allData.push({ ...q, answer: answerText, _id: id });
+                    });
+                }
+                filterData();
+            });
+        }
+
+        function filterData() {
+            let filtered = allData;
+            const search = searchBar.value.toLowerCase();
+            const filter = filterSelect.value;
+            if (search) {
+                filtered = filtered.filter(row =>
+                    row.question.toLowerCase().includes(search) ||
+                    row.answer.toLowerCase().includes(search)
+                );
+            }
+            if (filter !== 'all') {
+                filtered = filtered.filter(row => {
+                    const ans = row.answer.toLowerCase();
+                    if (filter === 'pending') return ans === 'pending';
+                    if (filter === 'notanswered') return ans === 'not answered yet';
+                    return true;
+                });
+            }
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            dataTable.innerHTML = '';
+            if (data.length === 0) {
+                dataTable.innerHTML = `<tr><td colspan="4" style="text-align:center">No Results Found</td></tr>`;
+                return;
+            }
+            data.forEach((q, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center;">${i + 1}</td>
+                    <td style="white-space:normal; min-width:200px;">${q.question}</td>
+                    <td style="text-align: center;">${q.answer}</td>
+                    <td style="text-align: center;">
+                        <button class="action-btn edit-btn" onclick="openEditModal('${q._id}', '${encodeURIComponent(q.question)}', '${encodeURIComponent(q.answer)}')"><i class='fa fa-edit'></i></button>
+                        <button class="action-btn delete-btn" onclick="deleteQuestion('${q._id}')"><i class='fa fa-trash'></i></button>
+                    </td>`;
+                dataTable.appendChild(tr);
+            });
+        }
+
+        function openEditModal(id, question, answer) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editQuestion').value = decodeURIComponent(question);
+            document.getElementById('editAnswer').value = decodeURIComponent(answer);
+            document.getElementById('editModal').style.display = 'flex';
+        }
+        function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+        function submitEditQuestion(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const question = document.getElementById('editQuestion').value.trim();
+            const answer = document.getElementById('editAnswer').value.trim();
+            db.ref('questions/' + id).update({ question, answer });
+            closeEditModal();
+            return false;
+        }
+        function deleteQuestion(id) { if (confirm('Delete this question?')) db.ref('questions/' + id).remove(); }
+
+        function downloadTXT() {
+            let content = "Questions & Answers\n\n" + allData.map((q, i) => `${i + 1}. ${q.question}\nAns: ${q.answer}\n`).join('\n');
+            const blob = new Blob([content], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "answers.txt";
+            link.click();
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            let y = 20;
+            pdf.text("Questions & Answers", 10, 10);
+            allData.forEach((q, i) => {
+                pdf.text(`${i + 1}. ${q.question}`, 10, y);
+                y += 7;
+                pdf.text(`Ans: ${q.answer}`, 15, y);
+                y += 10;
+                if (y > 280) { pdf.addPage(); y = 20; }
+            });
+            pdf.save("answers.pdf");
+        }
+
+        searchBar.addEventListener('input', filterData);
+        filterSelect.addEventListener('change', filterData);
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAddModal(); closeEditModal(); } });
+        fetchData();
+    </script>
+</body>
+</html>
