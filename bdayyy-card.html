@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Card - Rose Theme</title>
+    <style>
+        body {
+            /* Page background ko Rose Pink kiya gaya hai */
+            background: #e91e63; 
+            background: linear-gradient(135deg, #e91e63 0%, #f48fb1 100%);
+            height: 100vh;
+            margin: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            position: relative;
+            width: 300px;
+            height: 425px;
+            /* Border color ko Rose theme ke hisaab se Pink/Purple kiya */
+            border: 10px solid #ad1457; 
+            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.3);
+            background-color: #fff5f8;
+            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 240, 245, 0.5));
+        }
+
+        .card .text-container {
+            width: 80%;
+            height: 80%;
+            margin: auto;
+            text-align: center;
+        }
+
+        .card .text-container #head {
+            font-family: 'Nobile', sans-serif;
+            font-size: 1.3em;
+            margin: 40px auto 20px auto;
+            color: #880e4f; /* Dark rose color for text */
+            font-weight: bold;
+        }
+
+        .card p {
+            font-size: 0.95em;
+            line-height: 1.5;
+            font-family: 'Nobile', sans-serif;
+            color: #4a148c;
+            font-style: italic;
+            margin-top: 15px;
+        }
+
+        .card .front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            margin: -10px 0px 0px -10px;
+            border: 10px solid #ad1457;
+            backface-visibility: hidden;
+            background-color: #fce4ec;
+            background-size: cover;
+            transform-style: preserve-3d;
+            transform-origin: 0% 50%;
+            transform: perspective(800px) rotateY(0deg);
+            transition: all 0.8s ease-in-out;
+            z-index: 2;
+        }
+
+        .card:hover .front {
+            transform: perspective(800px) rotateY(-170deg);
+        }
+
+        .card .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 10px solid #ad1457;
+            margin: -10px 0px 0px -10px;
+            backface-visibility: visible;
+            transform-style: preserve-3d;
+            transform-origin: 0% 50%;
+            transform: perspective(800px) rotateY(0deg);
+            transition: all 0.8s ease-in-out;
+            background-color: #f8bbd0;
+            z-index: 1;
+        }
+
+        .card:hover .back {
+            transform: perspective(800px) rotateY(-170deg);
+            box-shadow: 7px 0px 5px 0px rgba(0, 0, 0, 0.3);
+        }
+
+        .imgset {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .imgset img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Taki image card ke hisaab se fit ho jaye */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="back"></div>
+        <div class="front">
+            <div class="imgset">
+                <img src="bgimg.png" alt="Rose Birthday Theme">
+            </div>
+        </div>
+        <div class="text-container">
+    <p id="head">Happy Birthday, Aadya</p>
+    <p>
+        Hello Aadya, aaj aapka special day hai aur dil se dua hai ki aapki life
+        hamesha khushiyon, peace aur growth se bhari rahe.
+        Aap sirf ek achhi sister hi nahi ho, balki ek strong aur kind insaan bhi ho.
+        Aap hamesha respected raho, safe raho aur apne sapno mein aage badhti raho.
+        Yeh birthday aapke liye ek naya, positive aur beautiful chapter le kar aaye.
+    </p>
+    <p>From, Silent Secure</p>
+</div>
+    </div>
+</body>
+</html>
